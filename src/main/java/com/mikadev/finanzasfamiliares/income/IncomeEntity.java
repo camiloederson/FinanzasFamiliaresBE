@@ -48,8 +48,6 @@ public class IncomeEntity extends BaseAuditableEntity {
     @JoinColumn(name = "bank_account_id", nullable = false)
     private BankAccountEntity bankAccount;
 
-    // Note: I added a 'date' column here for completeness, as it's common for incomes
-    // and helps determine year/month. I'll include it in the DTOs/Mapper.
     @Column(nullable = false)
     private LocalDate date;
 }

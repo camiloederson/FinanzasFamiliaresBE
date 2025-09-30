@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface BudgetInstanceRepository extends JpaRepository<BudgetInstanceEntity, Long> {
 
+    public List<BudgetInstanceEntity> findByYearRelatedAndMonthRelated(int year, int month);
+
     @Query("SELECT bi FROM BudgetInstanceEntity bi WHERE bi.deleted = false")
     List<BudgetInstanceEntity> findAllActive();
 

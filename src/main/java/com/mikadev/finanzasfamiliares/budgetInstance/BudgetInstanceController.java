@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/budget-instances")
+@RequestMapping("/api/v1/budget-instances")
 public class BudgetInstanceController {
 
     @Autowired
