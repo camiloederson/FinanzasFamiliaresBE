@@ -6,6 +6,6 @@ public record CategoryReportGetDTO(
         String categoryName,
         BigDecimal budgetedAmount,
         BigDecimal spentAmount,
-        BigDecimal avalaibleAmount
+        BigDecimal availableAmount
 ) {
 }

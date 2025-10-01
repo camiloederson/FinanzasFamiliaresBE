@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/budget-instances")
+@CrossOrigin(origins = "http://localhost:4200")
 public class BudgetInstanceController {
 
     @Autowired

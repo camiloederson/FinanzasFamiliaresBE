@@ -18,7 +18,6 @@ public class ExpenseMapper {
         entity.setBudgetInstance(budgetInstance);
         entity.setAmount(postDTO.amount());
         entity.setBankAccount(bankAccount);
-        entity.setDate(postDTO.date());
         entity.setYearRelated(postDTO.yearRelated());
         entity.setMonthRelated(postDTO.monthRelated());
         entity.setCreatedBy(createdBy);

@@ -20,9 +20,6 @@ public record ExpensePostDTO(
         @Min(value = 1, message = "El ID debe ser un número positivo")
         Long bankAccountId,
 
-        @NotNull(message = "La fecha es obligatoria")
-        LocalDate date,
-
         @NotNull(message = "El año es obligatorio")
         @Min(value = 2000, message = "El año debe ser válido")
         Integer yearRelated,

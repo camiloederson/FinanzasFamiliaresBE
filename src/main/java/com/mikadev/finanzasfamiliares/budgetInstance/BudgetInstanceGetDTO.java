@@ -13,8 +13,6 @@ public record BudgetInstanceGetDTO(
         Integer monthRelated,
         String description,
         Boolean deleted,
-
-        // Auditoría
         Long createdBy,
         Long updatedBy,
         LocalDateTime createdAt,
