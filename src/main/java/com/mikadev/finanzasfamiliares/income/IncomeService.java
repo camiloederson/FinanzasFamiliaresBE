@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -87,5 +88,19 @@ public class IncomeService {
         // TODO: Restar el amount del balance de la BankAccount antes de eliminar.
 
         incomeRepository.deleteById(id);
+    }
+
+    public IncomesByYearAndMonthGetDTO totalIncomes(int year, int month){
+        List<IncomeEntity> incomeList = incomeRepository.findByYearRelatedAndMonthRelated(year, month);
+        BigDecimal totalIncomes = new BigDecimal(0);
+        for (IncomeEntity income : incomeList) {
+            totalIncomes = totalIncomes.add(income.getAmount());
+        }
+        return new IncomesByYearAndMonthGetDTO(year, month, totalIncomes);
+    }
+
+    public List<IncomeGetDTO> findByYearAndMonth(int year, int month) {
+        List<IncomeEntity> incomeList = incomeRepository.findByYearRelatedAndMonthRelated(year, month);
+        return incomeMapper.entityListToGetDtoList(incomeList);
     }
 }

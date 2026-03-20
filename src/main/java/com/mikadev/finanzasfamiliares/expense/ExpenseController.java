@@ -2,6 +2,7 @@ package com.mikadev.finanzasfamiliares.expense;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +18,11 @@ public class ExpenseController {
     private ExpenseService expenseService;
 
     @GetMapping
-    public ResponseEntity<List<ExpenseGetDTO>> getAllExpenses() {
-        List<ExpenseGetDTO> expenses = expenseService.findAll();
-        return new ResponseEntity<>(expenses, HttpStatus.OK);
+    public ResponseEntity<Page<ExpenseGetDTO>> getAllExpenses(@RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "10") int size,
+                                                              @RequestParam(defaultValue = "date, desc") String[] sort) {
+        Page<ExpenseGetDTO> expenses = expenseService.findAll(page, size, sort);
+        return ResponseEntity.ok(expenses);
     }
 
     @GetMapping("/{id}")
@@ -50,5 +53,14 @@ public class ExpenseController {
         // Ya no necesitamos el @RequestHeader("X-User-Id") porque es hard delete.
         expenseService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/total/{year}/{month}")
+    public ResponseEntity<ExpensesByYearAndMonthGetDTO> getExpensesByYearAndMonth(@PathVariable int year,
+                                                                                  @PathVariable int month) {
+        ExpensesByYearAndMonthGetDTO expenses = new ExpensesByYearAndMonthGetDTO(
+                year, month, expenseService.getTotalExpenses(year, month));
+
+        return ResponseEntity.ok(expenses);
     }
 }

@@ -6,10 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/incomes")
+@RequestMapping("/api/v1/incomes")
+@CrossOrigin(origins = "http://localhost:4200")
 public class IncomeController {
 
     @Autowired
@@ -49,4 +51,17 @@ public class IncomeController {
         incomeService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/total/{year}/{month}")
+    public ResponseEntity<IncomesByYearAndMonthGetDTO> getIncomesByYearMonth(@PathVariable int year,
+                                                            @PathVariable int month) {
+        return ResponseEntity.ok(incomeService.totalIncomes(year, month));
+    }
+
+    @GetMapping("/list/{year}/{month}")
+    public ResponseEntity<List<IncomeGetDTO>> getDTOSByYearAndMonth(@PathVariable int year,
+                                                    @PathVariable int month) {
+        return ResponseEntity.ok(incomeService.findByYearAndMonth(year, month));
+    }
+
 }

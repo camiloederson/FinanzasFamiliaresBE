@@ -60,10 +60,7 @@ public class IncomeMapper {
                 entity.getDescription() != null ? entity.getDescription() : null,
                 entity.getCustomer() != null ? entity.getCustomer() : null,
                 entity.getReceivedBy() != null ? entity.getReceivedBy() : null,
-                entity.getIncomeType() != null ? entity.getIncomeType() : null,
-
                 entity.getBankAccount().getId(),
-                entity.getBankAccount().getName(),
 
                 // Auditoría
                 entity.getCreatedBy().getId(),

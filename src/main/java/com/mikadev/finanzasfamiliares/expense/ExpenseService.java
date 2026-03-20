@@ -8,11 +8,15 @@ import com.mikadev.finanzasfamiliares.shared.ResourceNotFoundException;
 import com.mikadev.finanzasfamiliares.user.UserEntity;
 import com.mikadev.finanzasfamiliares.user.UserRepository;
 import jakarta.transaction.Transactional;
+import org.hibernate.query.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,10 +37,28 @@ public class ExpenseService {
     @Autowired
     private ExpenseMapper expenseMapper;
 
-    public List<ExpenseGetDTO> findAll() {
-        // Usamos findAll() estándar porque no hay soft-delete
-        List<ExpenseEntity> entities = expenseRepository.findAll();
-        return expenseMapper.entityListToGetDtoList(entities);
+    public Page<ExpenseGetDTO> findAll(int page, int size, String[] sort) {
+        if(page < 0) page = 0;
+        if(size <= 0) size = 10;
+
+        String sortedBy = "date";
+        Sort.Direction sortDirection = Sort.Direction.DESC;
+
+        if(sort != null && sort.length == 2) {
+            sortedBy = sort[0];
+            sortDirection = sort[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortedBy));
+
+        Page<ExpenseEntity> expenses = expenseRepository.findAll(pageable);
+
+        List<ExpenseGetDTO> expensesDTO = new ArrayList<>();
+        for (ExpenseEntity expenseEntity : expenses.getContent()) {
+            expensesDTO.add(expenseMapper.entityToGetDto(expenseEntity));
+        }
+
+        return new PageImpl<>(expensesDTO, pageable, expenses.getTotalElements());
     }
 
     public ExpenseGetDTO findById(Long id) {
@@ -114,5 +136,15 @@ public class ExpenseService {
         // TODO: Restar el amount del spentAmount en BudgetInstanceEntity antes de eliminar.
 
         expenseRepository.deleteById(id);
+    }
+
+    public BigDecimal getTotalExpenses(int year, int month) {
+        List<ExpenseEntity> entities = expenseRepository.findByYearRelatedAndMonthRelated(year, month);
+        BigDecimal totalExpenses = BigDecimal.ZERO;
+
+        for (ExpenseEntity entity : entities) {
+            totalExpenses = totalExpenses.add(entity.getAmount());
+        }
+        return totalExpenses;
     }
 }

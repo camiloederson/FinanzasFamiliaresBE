@@ -13,9 +13,7 @@ public record IncomeGetDTO(
         String description,
         String customer,
         String receivedBy,
-        String incomeType,
         Long bankAccountId,
-        String bankAccountName,
 
         // Auditoría
         Long createdBy,
