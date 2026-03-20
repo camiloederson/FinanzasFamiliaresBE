@@ -1,7 +1,7 @@
 package com.mikadev.finanzasfamiliares.income;
 
-import com.mikadev.finanzasfamiliares.bankAccount.BankAccountEntity;
-import com.mikadev.finanzasfamiliares.bankAccount.BankAccountRepository;
+import com.mikadev.finanzasfamiliares.budgetMonth.BudgetMonthEntity;
+import com.mikadev.finanzasfamiliares.budgetMonth.BudgetMonthRepository;
 import com.mikadev.finanzasfamiliares.shared.ResourceNotFoundException;
 import com.mikadev.finanzasfamiliares.user.UserEntity;
 import com.mikadev.finanzasfamiliares.user.UserRepository;
@@ -9,7 +9,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class IncomeService {
     private IncomeRepository incomeRepository;
 
     @Autowired
-    private BankAccountRepository bankAccountRepository;
+    private BudgetMonthRepository budgetMonthRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -29,8 +28,7 @@ public class IncomeService {
     private IncomeMapper incomeMapper;
 
     public List<IncomeGetDTO> findAll() {
-        List<IncomeEntity> entities = incomeRepository.findAll();
-        return incomeMapper.entityListToGetDtoList(entities);
+        return incomeMapper.entityListToGetDtoList(incomeRepository.findAll());
     }
 
     public IncomeGetDTO findById(Long id) {
@@ -41,43 +39,42 @@ public class IncomeService {
     }
 
     @Transactional
-    public IncomeGetDTO create(IncomePostDTO postDTO, Long createdByUserId) {
-        // 1. Fetch references
-        UserEntity createdBy = userRepository.findById(createdByUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", createdByUserId));
+    public IncomeGetDTO create(IncomePostDTO dto, Long userId) {
 
-        BankAccountEntity bankAccount = bankAccountRepository.findById(postDTO.bankAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException("BankAccount", "id", postDTO.bankAccountId()));
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        // 2. Map, audit, and save
-        IncomeEntity entity = incomeMapper.postDtoToEntity(postDTO, bankAccount, createdBy);
+        BudgetMonthEntity budgetMonth = budgetMonthRepository.findById(dto.budgetMonthId())
+                .orElseThrow(() -> new ResourceNotFoundException("BudgetMonth", "id", dto.budgetMonthId()));
+
+        IncomeEntity entity = incomeMapper.postDtoToEntity(dto, budgetMonth, user);
+
         entity.setCreatedAt(LocalDateTime.now());
-        entity = incomeRepository.save(entity);
 
-        // TODO: En un sistema real, aquí se actualizaría el balance de la BankAccount.
+        entity = incomeRepository.save(entity);
 
         return incomeMapper.entityToGetDto(entity);
     }
 
     @Transactional
-    public IncomeGetDTO update(Long id, IncomePutDTO putDTO, Long updatedByUserId) {
-        IncomeEntity existingEntity = incomeRepository.findById(id)
+    public IncomeGetDTO update(Long id, IncomePutDTO dto, Long userId) {
+
+        IncomeEntity existing = incomeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Income", "id", id));
 
-        // 1. Fetch references
-        UserEntity updatedBy = userRepository.findById(updatedByUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", updatedByUserId));
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        BankAccountEntity bankAccount = bankAccountRepository.findById(putDTO.bankAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException("BankAccount", "id", putDTO.bankAccountId()));
+        BudgetMonthEntity budgetMonth = budgetMonthRepository.findById(dto.budgetMonthId())
+                .orElseThrow(() -> new ResourceNotFoundException("BudgetMonth", "id", dto.budgetMonthId()));
 
-        // 2. Map, audit, and save
-        // TODO: Gestionar la actualización del balance de la BankAccount (revertir el viejo, aplicar el nuevo).
-        existingEntity = incomeMapper.putDtoToEntity(putDTO, bankAccount, existingEntity, updatedBy);
-        existingEntity.setUpdatedAt(LocalDateTime.now());
-        existingEntity = incomeRepository.save(existingEntity);
+        existing = incomeMapper.putDtoToEntity(dto, budgetMonth, existing, user);
 
-        return incomeMapper.entityToGetDto(existingEntity);
+        existing.setUpdatedAt(LocalDateTime.now());
+
+        existing = incomeRepository.save(existing);
+
+        return incomeMapper.entityToGetDto(existing);
     }
 
     @Transactional
@@ -85,22 +82,6 @@ public class IncomeService {
         IncomeEntity entity = incomeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Income", "id", id));
 
-        // TODO: Restar el amount del balance de la BankAccount antes de eliminar.
-
-        incomeRepository.deleteById(id);
-    }
-
-    public IncomesByYearAndMonthGetDTO totalIncomes(int year, int month){
-        List<IncomeEntity> incomeList = incomeRepository.findByYearRelatedAndMonthRelated(year, month);
-        BigDecimal totalIncomes = new BigDecimal(0);
-        for (IncomeEntity income : incomeList) {
-            totalIncomes = totalIncomes.add(income.getAmount());
-        }
-        return new IncomesByYearAndMonthGetDTO(year, month, totalIncomes);
-    }
-
-    public List<IncomeGetDTO> findByYearAndMonth(int year, int month) {
-        List<IncomeEntity> incomeList = incomeRepository.findByYearRelatedAndMonthRelated(year, month);
-        return incomeMapper.entityListToGetDtoList(incomeList);
+        incomeRepository.delete(entity);
     }
 }

@@ -27,7 +27,7 @@ public class BudgetCategoryEntity extends BaseAuditableEntity {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "budget_section_id", nullable = false) // Columna DB
+    @JoinColumn(name = "budget_section_id", nullable = false)
     private BudgetSectionEntity budgetSection;
 
     @Column(nullable = false)

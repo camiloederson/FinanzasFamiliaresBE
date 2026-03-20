@@ -11,4 +11,6 @@ public interface BudgetMonthRepository extends JpaRepository<BudgetMonthEntity, 
     Optional<BudgetMonthEntity> findByYearAndMonth(Integer year, Integer month);
 
     boolean existsByYearAndMonth(Integer year, Integer month);
+
+    boolean existsByYearAndMonthAndIdNot(Integer year, Integer month, Long id);
 }

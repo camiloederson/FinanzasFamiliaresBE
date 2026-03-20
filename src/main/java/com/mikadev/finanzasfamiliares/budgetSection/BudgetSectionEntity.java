@@ -27,7 +27,4 @@ public class BudgetSectionEntity extends BaseAuditableEntity {
 
     @Column(nullable = false)
     private Boolean deleted = false;
-
-    // El resto de campos de auditoría (`createdBy`, `createdAt`, etc.)
-    // se heredan de BaseAuditableEntity.
 }

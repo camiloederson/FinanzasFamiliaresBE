@@ -6,17 +6,16 @@ import java.time.LocalDateTime;
 
 public record ExpenseGetDTO(
         Long id,
-        Long budgetInstanceId,
+        Long budgetMonthId,
+        Integer budgetMonthYear,
+        Integer budgetMonthMonth,
+        Long budgetCategoryId,
         String budgetCategoryName,
         BigDecimal amount,
         String description,
         Long bankAccountId,
         String bankAccountName,
         LocalDate date,
-        Integer yearRelated,
-        Integer monthRelated,
-
-        // Auditoría
         Long createdBy,
         Long updatedBy,
         LocalDateTime createdAt,

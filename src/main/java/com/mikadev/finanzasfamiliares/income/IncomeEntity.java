@@ -1,6 +1,6 @@
 package com.mikadev.finanzasfamiliares.income;
 
-import com.mikadev.finanzasfamiliares.bankAccount.BankAccountEntity;
+import com.mikadev.finanzasfamiliares.budgetMonth.BudgetMonthEntity;
 import com.mikadev.finanzasfamiliares.shared.BaseAuditableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,31 +23,28 @@ public class IncomeEntity extends BaseAuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 🔹 Parent: Monthly Budget
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "budget_month_id", nullable = false)
+    private BudgetMonthEntity budgetMonth;
+
+    // 🔹 Amount of income
     @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "year_related", nullable = false)
-    private Integer yearRelated;
+    // 🔹 Date when income was received
+    @Column(nullable = false)
+    private LocalDate incomeDate;
 
-    @Column(name = "month_related", nullable = false)
-    private Integer monthRelated;
+    // 🔹 Source of income (salary, freelance, etc.)
+    @Column(nullable = false, length = 150)
+    private String source;
 
+    // 🔹 Optional description
     @Column(length = 500)
     private String description;
 
-    @Column(length = 200)
-    private String customer;
-
-    @Column(name = "received_by", length = 100)
-    private String receivedBy;
-
-    @Column(name = "income_type", length = 50)
-    private String incomeType;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bank_account_id", nullable = false)
-    private BankAccountEntity bankAccount;
-
+    // 🔹 Soft delete
     @Column(nullable = false)
-    private LocalDate date;
+    private Boolean deleted = false;
 }

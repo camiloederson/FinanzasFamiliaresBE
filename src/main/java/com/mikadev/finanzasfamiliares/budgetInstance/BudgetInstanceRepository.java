@@ -10,17 +10,25 @@ import java.util.Optional;
 @Repository
 public interface BudgetInstanceRepository extends JpaRepository<BudgetInstanceEntity, Long> {
 
-    public List<BudgetInstanceEntity> findByYearRelatedAndMonthRelated(int year, int month);
-
     @Query("SELECT bi FROM BudgetInstanceEntity bi WHERE bi.deleted = false")
     List<BudgetInstanceEntity> findAllActive();
 
     @Query("SELECT bi FROM BudgetInstanceEntity bi WHERE bi.id = :id AND bi.deleted = false")
     Optional<BudgetInstanceEntity> findByIdActive(Long id);
 
-    @Query("SELECT COUNT(bi) > 0 FROM BudgetInstanceEntity bi WHERE bi.budgetCategory.id = :categoryId AND bi.yearRelated = :year AND bi.monthRelated = :month AND bi.deleted = false AND bi.id != :excludeId")
-    boolean existsByCategoryIdAndDateAndNotDeleted(Long categoryId, Integer year, Integer month, Long excludeId);
+    @Query("SELECT bi FROM BudgetInstanceEntity bi WHERE bi.budgetMonth.id = :budgetMonthId AND bi.deleted = false")
+    List<BudgetInstanceEntity> findAllActiveByBudgetMonthId(Long budgetMonthId);
 
-    @Query("SELECT COUNT(bi) > 0 FROM BudgetInstanceEntity bi WHERE bi.budgetCategory.id = :categoryId AND bi.yearRelated = :year AND bi.monthRelated = :month AND bi.deleted = false")
-    boolean existsByCategoryIdAndDateAndNotDeleted(Long categoryId, Integer year, Integer month);
+    boolean existsByBudgetMonthIdAndBudgetCategoryIdAndDeletedFalse(Long budgetMonthId, Long budgetCategoryId);
+
+    boolean existsByBudgetMonthIdAndBudgetCategoryIdAndDeletedFalseAndIdNot(
+            Long budgetMonthId,
+            Long budgetCategoryId,
+            Long id
+    );
+
+    Optional<BudgetInstanceEntity> findByBudgetMonthIdAndBudgetCategoryIdAndDeletedFalse(
+            Long budgetMonthId,
+            Long budgetCategoryId
+    );
 }

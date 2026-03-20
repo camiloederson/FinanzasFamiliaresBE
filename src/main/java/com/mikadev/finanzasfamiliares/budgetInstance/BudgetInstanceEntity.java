@@ -1,15 +1,26 @@
 package com.mikadev.finanzasfamiliares.budgetInstance;
 
 import com.mikadev.finanzasfamiliares.budgetCategory.BudgetCategoryEntity;
+import com.mikadev.finanzasfamiliares.budgetMonth.BudgetMonthEntity;
 import com.mikadev.finanzasfamiliares.shared.BaseAuditableEntity;
-import com.mikadev.finanzasfamiliares.user.UserEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "budget_instances")
+@Table(
+        name = "budget_instances",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_budget_instance_month_category",
+                        columnNames = {"budget_month_id", "budget_category_id"}
+                )
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,21 +31,19 @@ public class BudgetInstanceEntity extends BaseAuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "budget_month_id", nullable = false)
+    private BudgetMonthEntity budgetMonth;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "budget_category_id", nullable = false)
     private BudgetCategoryEntity budgetCategory;
 
     @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal amount;
+    private BigDecimal plannedAmount;
 
-    @Column(name = "spent_amount", nullable = false, precision = 14, scale = 2)
+    @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal spentAmount = BigDecimal.ZERO;
-
-    @Column(name = "year_related", nullable = false)
-    private Integer yearRelated;
-
-    @Column(name = "month_related", nullable = false)
-    private Integer monthRelated;
 
     @Column(length = 500)
     private String description;

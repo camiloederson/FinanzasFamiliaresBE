@@ -3,12 +3,11 @@ package com.mikadev.finanzasfamiliares.budgetMonth;
 import com.mikadev.finanzasfamiliares.shared.ResourceNotFoundException;
 import com.mikadev.finanzasfamiliares.user.UserEntity;
 import com.mikadev.finanzasfamiliares.user.UserRepository;
-import com.mikadev.finanzasfamiliares.user.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BudgetMonthService {
@@ -22,56 +21,69 @@ public class BudgetMonthService {
         this.userRepository = userRepository;
     }
 
-    // findAll
     public List<BudgetMonthGetDTO> findAll() {
         List<BudgetMonthEntity> entities = budgetMonthRepository.findAll();
         List<BudgetMonthGetDTO> dtos = new ArrayList<>();
+
         for (BudgetMonthEntity entity : entities) {
             dtos.add(BudgetMonthMapper.toGetDTO(entity));
         }
+
         return dtos;
     }
 
-    // findById
     public BudgetMonthGetDTO findById(Long id) {
         BudgetMonthEntity entity = budgetMonthRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Presupuesto mensual no encontrado con id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("BudgetMonth", "id", id));
+
         return BudgetMonthMapper.toGetDTO(entity);
     }
 
-    public BudgetMonthGetDTO save(BudgetMonthPostDTO dto) {
-        UserEntity createdBy = userRepository.findById(dto.createdById())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id " + dto.createdById()));
+    @Transactional
+    public BudgetMonthGetDTO save(BudgetMonthPostDTO dto, Long createdByUserId) {
+        if (budgetMonthRepository.existsByYearAndMonth(dto.year(), dto.month())) {
+            throw new IllegalArgumentException("Ya existe un presupuesto mensual para ese año y mes.");
+        }
+
+        UserEntity createdBy = userRepository.findById(createdByUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", createdByUserId));
 
         BudgetMonthEntity entity = BudgetMonthMapper.toEntity(dto, createdBy);
         BudgetMonthEntity saved = budgetMonthRepository.save(entity);
+
         return BudgetMonthMapper.toGetDTO(saved);
     }
 
-    public BudgetMonthGetDTO update(Long id, BudgetMonthPutDTO dto) {
+    @Transactional
+    public BudgetMonthGetDTO update(Long id, BudgetMonthPutDTO dto, Long updatedByUserId) {
         BudgetMonthEntity entity = budgetMonthRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Presupuesto mensual no encontrado con id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("BudgetMonth", "id", id));
 
-        UserEntity updatedBy = userRepository.findById(dto.updatedById())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id " + dto.updatedById()));
+        if (budgetMonthRepository.existsByYearAndMonthAndIdNot(dto.year(), dto.month(), id)) {
+            throw new IllegalArgumentException("Ya existe otro presupuesto mensual para ese año y mes.");
+        }
+
+        UserEntity updatedBy = userRepository.findById(updatedByUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", updatedByUserId));
 
         BudgetMonthMapper.updateEntity(entity, dto, updatedBy);
         BudgetMonthEntity updated = budgetMonthRepository.save(entity);
+
         return BudgetMonthMapper.toGetDTO(updated);
     }
 
-
-    // delete
+    @Transactional
     public void delete(Long id) {
         BudgetMonthEntity entity = budgetMonthRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Presupuesto mensual no encontrado con id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("BudgetMonth", "id", id));
+
         budgetMonthRepository.delete(entity);
     }
 
-    // findByYearAndMonth
     public BudgetMonthGetDTO findByYearAndMonth(Integer year, Integer month) {
         BudgetMonthEntity entity = budgetMonthRepository.findByYearAndMonth(year, month)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe presupuesto para " + month + "/" + year));
+
         return BudgetMonthMapper.toGetDTO(entity);
     }
 }

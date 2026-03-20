@@ -1,78 +1,72 @@
 package com.mikadev.finanzasfamiliares.income;
 
-import com.mikadev.finanzasfamiliares.bankAccount.BankAccountEntity;
+import com.mikadev.finanzasfamiliares.budgetMonth.BudgetMonthEntity;
 import com.mikadev.finanzasfamiliares.user.UserEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class IncomeMapper {
 
-    public IncomeEntity postDtoToEntity(IncomePostDTO postDTO, BankAccountEntity bankAccount, UserEntity createdBy) {
+    public IncomeEntity postDtoToEntity(
+            IncomePostDTO dto,
+            BudgetMonthEntity budgetMonth,
+            UserEntity createdBy
+    ) {
         IncomeEntity entity = new IncomeEntity();
 
-        // Obligatorios
-        entity.setAmount(postDTO.amount());
-        entity.setDate(postDTO.date());
-        entity.setYearRelated(postDTO.yearRelated());
-        entity.setMonthRelated(postDTO.monthRelated());
-        entity.setBankAccount(bankAccount);
+        entity.setBudgetMonth(budgetMonth);
+        entity.setAmount(dto.amount());
+        entity.setIncomeDate(dto.incomeDate());
+        entity.setSource(dto.source());
+        entity.setDescription(dto.description());
         entity.setCreatedBy(createdBy);
-
-        // Nulos/Opcionales
-        entity.setDescription(postDTO.description());
-        entity.setCustomer(postDTO.customer());
-        entity.setReceivedBy(postDTO.receivedBy());
-        entity.setIncomeType(postDTO.incomeType());
 
         return entity;
     }
 
-    public IncomeEntity putDtoToEntity(IncomePutDTO putDTO, BankAccountEntity bankAccount, IncomeEntity existingEntity, UserEntity updatedBy) {
-        // Obligatorios
-        existingEntity.setAmount(putDTO.amount());
-        existingEntity.setDate(putDTO.date());
-        existingEntity.setYearRelated(putDTO.yearRelated());
-        existingEntity.setMonthRelated(putDTO.monthRelated());
-        existingEntity.setBankAccount(bankAccount);
-        existingEntity.setUpdatedBy(updatedBy);
+    public IncomeEntity putDtoToEntity(
+            IncomePutDTO dto,
+            BudgetMonthEntity budgetMonth,
+            IncomeEntity entity,
+            UserEntity updatedBy
+    ) {
+        entity.setBudgetMonth(budgetMonth);
+        entity.setAmount(dto.amount());
+        entity.setIncomeDate(dto.incomeDate());
+        entity.setSource(dto.source());
+        entity.setDescription(dto.description());
+        entity.setUpdatedBy(updatedBy);
 
-        // Nulos/Opcionales
-        existingEntity.setDescription(putDTO.description());
-        existingEntity.setCustomer(putDTO.customer());
-        existingEntity.setReceivedBy(putDTO.receivedBy());
-        existingEntity.setIncomeType(putDTO.incomeType());
-
-        return existingEntity;
+        return entity;
     }
 
     public IncomeGetDTO entityToGetDto(IncomeEntity entity) {
-        // Usamos ternario solo para campos que NO son @NotNull en la entidad
         return new IncomeGetDTO(
                 entity.getId(),
+                entity.getBudgetMonth().getId(),
+                entity.getBudgetMonth().getYear(),
+                entity.getBudgetMonth().getMonth(),
                 entity.getAmount(),
-                entity.getDate(),
-                entity.getYearRelated(),
-                entity.getMonthRelated(),
-
-                entity.getDescription() != null ? entity.getDescription() : null,
-                entity.getCustomer() != null ? entity.getCustomer() : null,
-                entity.getReceivedBy() != null ? entity.getReceivedBy() : null,
-                entity.getBankAccount().getId(),
-
-                // Auditoría
+                entity.getIncomeDate(),
+                entity.getSource(),
+                entity.getDescription(),
                 entity.getCreatedBy().getId(),
                 entity.getUpdatedBy() != null ? entity.getUpdatedBy().getId() : null,
                 entity.getCreatedAt(),
-                entity.getUpdatedAt() != null ? entity.getUpdatedAt() : null
+                entity.getUpdatedAt()
         );
     }
 
     public List<IncomeGetDTO> entityListToGetDtoList(List<IncomeEntity> entities) {
-        return entities.stream()
-                .map(this::entityToGetDto)
-                .collect(Collectors.toList());
+        List<IncomeGetDTO> list = new ArrayList<>();
+
+        for (IncomeEntity e : entities) {
+            list.add(entityToGetDto(e));
+        }
+
+        return list;
     }
 }

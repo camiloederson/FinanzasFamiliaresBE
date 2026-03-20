@@ -5,12 +5,13 @@ import java.time.LocalDateTime;
 
 public record BudgetInstanceGetDTO(
         Long id,
+        Long budgetMonthId,
+        Integer budgetMonthYear,
+        Integer budgetMonthMonth,
         Long budgetCategoryId,
-        String budgetCategoryName, // Se añade el nombre para conveniencia del cliente
-        BigDecimal amount,
+        String budgetCategoryName,
+        BigDecimal plannedAmount,
         BigDecimal spentAmount,
-        Integer yearRelated,
-        Integer monthRelated,
         String description,
         Boolean deleted,
         Long createdBy,

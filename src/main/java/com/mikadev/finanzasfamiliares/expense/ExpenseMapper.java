@@ -1,76 +1,83 @@
 package com.mikadev.finanzasfamiliares.expense;
 
 import com.mikadev.finanzasfamiliares.bankAccount.BankAccountEntity;
-import com.mikadev.finanzasfamiliares.budgetInstance.BudgetInstanceEntity;
+import com.mikadev.finanzasfamiliares.budgetCategory.BudgetCategoryEntity;
+import com.mikadev.finanzasfamiliares.budgetMonth.BudgetMonthEntity;
 import com.mikadev.finanzasfamiliares.user.UserEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class ExpenseMapper {
 
-    public ExpenseEntity postDtoToEntity(ExpensePostDTO postDTO, BudgetInstanceEntity budgetInstance, BankAccountEntity bankAccount, UserEntity createdBy) {
+    public ExpenseEntity postDtoToEntity(
+            ExpensePostDTO dto,
+            BudgetMonthEntity budgetMonth,
+            BudgetCategoryEntity category,
+            BankAccountEntity bankAccount,
+            UserEntity createdBy
+    ) {
         ExpenseEntity entity = new ExpenseEntity();
 
-        // Obligatorios
-        entity.setBudgetInstance(budgetInstance);
-        entity.setAmount(postDTO.amount());
+        entity.setBudgetMonth(budgetMonth);
+        entity.setBudgetCategory(category);
+        entity.setAmount(dto.amount());
         entity.setBankAccount(bankAccount);
-        entity.setYearRelated(postDTO.yearRelated());
-        entity.setMonthRelated(postDTO.monthRelated());
+        entity.setDate(dto.date());
+        entity.setDescription(dto.description());
         entity.setCreatedBy(createdBy);
-
-        // Nulo/Opcional
-        entity.setDescription(postDTO.description());
 
         return entity;
     }
 
-    public ExpenseEntity putDtoToEntity(ExpensePutDTO putDTO, BudgetInstanceEntity budgetInstance, BankAccountEntity bankAccount, ExpenseEntity existingEntity, UserEntity updatedBy) {
-        // Obligatorios
-        existingEntity.setBudgetInstance(budgetInstance);
-        existingEntity.setAmount(putDTO.amount());
-        existingEntity.setBankAccount(bankAccount);
-        existingEntity.setDate(putDTO.date());
-        existingEntity.setYearRelated(putDTO.yearRelated());
-        existingEntity.setMonthRelated(putDTO.monthRelated());
-        existingEntity.setUpdatedBy(updatedBy);
+    public ExpenseEntity putDtoToEntity(
+            ExpensePutDTO dto,
+            BudgetMonthEntity budgetMonth,
+            BudgetCategoryEntity category,
+            BankAccountEntity bankAccount,
+            ExpenseEntity entity,
+            UserEntity updatedBy
+    ) {
+        entity.setBudgetMonth(budgetMonth);
+        entity.setBudgetCategory(category);
+        entity.setAmount(dto.amount());
+        entity.setBankAccount(bankAccount);
+        entity.setDate(dto.date());
+        entity.setDescription(dto.description());
+        entity.setUpdatedBy(updatedBy);
 
-        // Nulo/Opcional
-        existingEntity.setDescription(putDTO.description());
-
-        return existingEntity;
+        return entity;
     }
 
     public ExpenseGetDTO entityToGetDto(ExpenseEntity entity) {
         return new ExpenseGetDTO(
                 entity.getId(),
-                entity.getBudgetInstance().getId(),
-                entity.getBudgetInstance().getBudgetCategory().getName(), // Nombre de la Categoría
+                entity.getBudgetMonth().getId(),
+                entity.getBudgetMonth().getYear(),
+                entity.getBudgetMonth().getMonth(),
+                entity.getBudgetCategory().getId(),
+                entity.getBudgetCategory().getName(),
                 entity.getAmount(),
-
-                entity.getDescription() != null ? entity.getDescription() : null, // description es opcional
-
+                entity.getDescription(),
                 entity.getBankAccount().getId(),
-                entity.getBankAccount().getName(), // Nombre de la Cuenta Bancaria
-
+                entity.getBankAccount().getName(),
                 entity.getDate(),
-                entity.getYearRelated(),
-                entity.getMonthRelated(),
-
-                // Auditoría
                 entity.getCreatedBy().getId(),
                 entity.getUpdatedBy() != null ? entity.getUpdatedBy().getId() : null,
                 entity.getCreatedAt(),
-                entity.getUpdatedAt() != null ? entity.getUpdatedAt() : null
+                entity.getUpdatedAt()
         );
     }
 
     public List<ExpenseGetDTO> entityListToGetDtoList(List<ExpenseEntity> entities) {
-        return entities.stream()
-                .map(this::entityToGetDto)
-                .collect(Collectors.toList());
+        List<ExpenseGetDTO> list = new ArrayList<>();
+
+        for (ExpenseEntity e : entities) {
+            list.add(entityToGetDto(e));
+        }
+
+        return list;
     }
 }

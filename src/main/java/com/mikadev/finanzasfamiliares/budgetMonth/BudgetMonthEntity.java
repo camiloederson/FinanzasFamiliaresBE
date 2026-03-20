@@ -10,7 +10,12 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "budget_months")
+@Table(
+        name = "budget_months",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_budget_month_year_month", columnNames = {"year", "month"})
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,15 +32,21 @@ public class BudgetMonthEntity extends BaseAuditableEntity {
     @Column(nullable = false)
     private Integer month;
 
-    @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal totalAmount;   // Presupuesto total del mes
+    @Column(name = "total_planned", nullable = false, precision = 14, scale = 2)
+    private BigDecimal totalPlanned = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal totalSpent = BigDecimal.ZERO; // Gastado en el mes
+    @Column(name = "total_income", nullable = false, precision = 14, scale = 2)
+    private BigDecimal totalIncome = BigDecimal.ZERO;
+
+    @Column(name = "total_expense", nullable = false, precision = 14, scale = 2)
+    private BigDecimal totalExpense = BigDecimal.ZERO;
+
+    @Column(name = "remaining_balance", nullable = false, precision = 14, scale = 2)
+    private BigDecimal remainingBalance = BigDecimal.ZERO;
 
     @Column(length = 500)
     private String description;
 
     @Column(nullable = false)
-    private Boolean closed = false; // por si quieres cerrar el mes
+    private Boolean closed = false;
 }

@@ -6,16 +6,14 @@ import java.time.LocalDateTime;
 
 public record IncomeGetDTO(
         Long id,
+        Long budgetMonthId,
+        Integer budgetMonthYear,
+        Integer budgetMonthMonth,
         BigDecimal amount,
-        LocalDate date,
-        Integer yearRelated,
-        Integer monthRelated,
+        LocalDate incomeDate,
+        String source,
         String description,
-        String customer,
-        String receivedBy,
-        Long bankAccountId,
 
-        // Auditoría
         Long createdBy,
         Long updatedBy,
         LocalDateTime createdAt,

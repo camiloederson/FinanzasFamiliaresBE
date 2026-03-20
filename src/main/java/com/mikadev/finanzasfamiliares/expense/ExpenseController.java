@@ -7,8 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/expenses")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -18,49 +16,46 @@ public class ExpenseController {
     private ExpenseService expenseService;
 
     @GetMapping
-    public ResponseEntity<Page<ExpenseGetDTO>> getAllExpenses(@RequestParam(defaultValue = "0") int page,
-                                                              @RequestParam(defaultValue = "10") int size,
-                                                              @RequestParam(defaultValue = "date, desc") String[] sort) {
-        Page<ExpenseGetDTO> expenses = expenseService.findAll(page, size, sort);
+    public ResponseEntity<Page<ExpenseGetDTO>> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<ExpenseGetDTO> expenses = expenseService.findAll(page, size, null);
         return ResponseEntity.ok(expenses);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ExpenseGetDTO> getExpenseById(@PathVariable Long id) {
-        ExpenseGetDTO expense = expenseService.findById(id);
-        return new ResponseEntity<>(expense, HttpStatus.OK);
+    public ResponseEntity<ExpenseGetDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(expenseService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<ExpenseGetDTO> createExpense(
-            @Valid @RequestBody ExpensePostDTO postDTO,
-            @RequestHeader("X-User-Id") Long userId) {
-        ExpenseGetDTO createdExpense = expenseService.create(postDTO, userId);
-        return new ResponseEntity<>(createdExpense, HttpStatus.CREATED);
+    public ResponseEntity<ExpenseGetDTO> save(
+            @Valid @RequestBody ExpensePostDTO dto,
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        ExpenseGetDTO created = expenseService.create(dto, userId);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ExpenseGetDTO> updateExpense(
+    public ResponseEntity<ExpenseGetDTO> update(
             @PathVariable Long id,
-            @Valid @RequestBody ExpensePutDTO putDTO,
-            @RequestHeader("X-User-Id") Long userId) {
-        ExpenseGetDTO updatedExpense = expenseService.update(id, putDTO, userId);
-        return new ResponseEntity<>(updatedExpense, HttpStatus.OK);
+            @Valid @RequestBody ExpensePutDTO dto,
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        return ResponseEntity.ok(expenseService.update(id, dto, userId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
-        // Ya no necesitamos el @RequestHeader("X-User-Id") porque es hard delete.
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         expenseService.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/total/{year}/{month}")
-    public ResponseEntity<ExpensesByYearAndMonthGetDTO> getExpensesByYearAndMonth(@PathVariable int year,
-                                                                                  @PathVariable int month) {
-        ExpensesByYearAndMonthGetDTO expenses = new ExpensesByYearAndMonthGetDTO(
-                year, month, expenseService.getTotalExpenses(year, month));
-
-        return ResponseEntity.ok(expenses);
+    // NEW: get expenses by budgetMonth
+    @GetMapping("/month/{budgetMonthId}")
+    public ResponseEntity<?> findByBudgetMonth(@PathVariable Long budgetMonthId) {
+        return ResponseEntity.ok(expenseService.findByBudgetMonth(budgetMonthId));
     }
 }

@@ -6,13 +6,18 @@ import java.math.BigDecimal;
 
 public class BudgetMonthMapper {
 
+    private BudgetMonthMapper() {
+    }
+
     public static BudgetMonthGetDTO toGetDTO(BudgetMonthEntity entity) {
         return new BudgetMonthGetDTO(
                 entity.getId(),
                 entity.getYear(),
                 entity.getMonth(),
-                entity.getTotalAmount(),
-                entity.getTotalSpent(),
+                entity.getTotalPlanned(),
+                entity.getTotalIncome(),
+                entity.getTotalExpense(),
+                entity.getRemainingBalance(),
                 entity.getDescription(),
                 entity.getClosed()
         );
@@ -22,20 +27,22 @@ public class BudgetMonthMapper {
         BudgetMonthEntity entity = new BudgetMonthEntity();
         entity.setYear(dto.year());
         entity.setMonth(dto.month());
-        entity.setTotalAmount(dto.totalAmount());
-        entity.setTotalSpent(BigDecimal.ZERO);
+        entity.setTotalPlanned(dto.totalPlanned());
+        entity.setTotalIncome(BigDecimal.ZERO);
+        entity.setTotalExpense(BigDecimal.ZERO);
+        entity.setRemainingBalance(BigDecimal.ZERO);
         entity.setDescription(dto.description());
         entity.setClosed(false);
-        entity.setCreatedBy(createdBy); // asignar usuario creador
+        entity.setCreatedBy(createdBy);
         return entity;
     }
 
     public static void updateEntity(BudgetMonthEntity entity, BudgetMonthPutDTO dto, UserEntity updatedBy) {
         entity.setYear(dto.year());
         entity.setMonth(dto.month());
-        entity.setTotalAmount(dto.totalAmount());
+        entity.setTotalPlanned(dto.totalPlanned());
         entity.setDescription(dto.description());
         entity.setClosed(dto.closed());
-        entity.setUpdatedBy(updatedBy); // asignar usuario actualizador
+        entity.setUpdatedBy(updatedBy);
     }
 }

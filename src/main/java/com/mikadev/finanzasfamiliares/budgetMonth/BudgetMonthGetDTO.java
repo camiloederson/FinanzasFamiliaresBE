@@ -6,8 +6,11 @@ public record BudgetMonthGetDTO(
         Long id,
         Integer year,
         Integer month,
-        BigDecimal totalAmount,
-        BigDecimal totalSpent,
+        BigDecimal totalPlanned,
+        BigDecimal totalIncome,
+        BigDecimal totalExpense,
+        BigDecimal remainingBalance,
         String description,
         Boolean closed
-) {}
+) {
+}
